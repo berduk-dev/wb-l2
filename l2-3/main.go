@@ -79,16 +79,14 @@ func main() {
 
 	// Проверка на уникальные строки и вывод
 	var unicLines []string
-	unicLinesMap := make(map[string]bool)
 	if u {
-		for _, str := range lines {
-			_, ok := unicLinesMap[str]
-			if ok {
-				unicLinesMap[str] = true
-				continue
+		for i := range lines {
+			if i > 0 {
+				if lines[i] == lines[i-1] {
+					continue
+				}
 			}
-			unicLines = append(unicLines, str)
-			unicLinesMap[str] = false
+			unicLines = append(unicLines, lines[i])
 		}
 		outBytes := []byte(strings.Join(unicLines, "\n"))
 		err = os.WriteFile("sorted.txt", outBytes, 0644)
