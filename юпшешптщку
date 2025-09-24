@@ -1,0 +1,33 @@
+# Бинарники и исполняемые файлы
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Кэш и временные файлы Go
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Каталоги Go
+/bin/
+/build/
+/dist/
+/out/
+/tmp/
+/coverage/
+
+# Модульные зависимости (восстанавливаются через go mod)
+vendor/
+
+# IDE и редакторы
+.idea/
+.vscode/
+*.iml
+
+# macOS системные файлы
+.DS_Store
