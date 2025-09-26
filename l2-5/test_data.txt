@@ -1,0 +1,32 @@
+Apple is red
+Banana is yellow
+Cherry is red
+Dates are brown
+Elderberry is purple
+Fig is green
+Grape is purple
+Honeydew is green
+Indian fig is green
+Jackfruit is yellow
+Kiwi is brown
+Lemon is yellow
+Mango is orange
+Nectarine is orange
+Dates are brown *2
+Orange is orange
+Orange is red
+Papaya is orange
+Quince is yellow
+Raspberry is red
+Strawberry is red
+Tangerine is orange
+Ugli fruit is green
+Vanilla bean is brown
+Watermelon is green
+Xigua is green
+Yellow passion fruit is yellow
+Zucchini is green
+apple pie is tasty
+BANANA split is sweet
+grape juice is purple
+orange juice is fresh
