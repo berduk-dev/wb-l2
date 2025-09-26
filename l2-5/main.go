@@ -86,6 +86,7 @@ func main() {
 			if !isEscape {
 				if n {
 					outputString += Flagn(i) + lines[i] + "\n"
+					count++
 					continue
 				}
 				outputString += lines[i] + "\n"
