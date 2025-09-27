@@ -35,8 +35,6 @@ func init() {
 }
 
 func main() {
-	fmt.Println(A, B, C, c, i, v, F, n)
-
 	grepString := flag.Arg(0)
 	filePath := flag.Arg(1)
 
@@ -85,11 +83,11 @@ func main() {
 		if v {
 			if !isEscape {
 				if n {
-					outputString += Flagn(i) + lines[i] + "\n"
+					outputString += AddLineNumber(i) + highlight(lines[i], grepString, F) + "\n"
 					count++
 					continue
 				}
-				outputString += lines[i] + "\n"
+				outputString += highlight(lines[i], grepString, F) + "\n"
 				count++
 				continue
 			}
@@ -99,22 +97,23 @@ func main() {
 			count++
 
 			if A > 0 {
-				outputString += FlagA(A, i, lines)
+				outputString += FlagA(A, i, grepString, lines, F)
 				continue
 			}
 			if B > 0 {
-				outputString += FlagB(B, i, lines)
+				outputString += FlagB(B, i, grepString, lines, F)
 				continue
 			}
 			if C > 0 {
-				outputString += FlagC(C, i, lines)
+				outputString += FlagC(C, i, grepString, lines, F)
 				continue
 			}
+
 			if n {
-				outputString += Flagn(i) + lines[i] + "\n"
-				continue
+				outputString += AddLineNumber(i) + highlight(lines[i], grepString, F) + "\n"
+			} else {
+				outputString += highlight(lines[i], grepString, F) + "\n"
 			}
-			outputString += lines[i] + "\n"
 		}
 	}
 
@@ -127,12 +126,24 @@ func main() {
 	fmt.Println(strings.TrimSpace(outputString))
 }
 
-func FlagA(aVal int, lineNumber int, lines []string) string {
+func highlight(line, grepString string, fixed bool) string {
+	var re *regexp.Regexp
+	if fixed {
+		// ищем буквально, без regexp-метасимволов
+		re = regexp.MustCompile("(?i)" + regexp.QuoteMeta(grepString))
+	} else {
+		// как есть (регулярка)
+		re = regexp.MustCompile("(?i)" + grepString)
+	}
+	return re.ReplaceAllString(line, "\033[31m$0\033[0m")
+}
+
+func FlagA(aVal int, lineNumber int, grepString string, lines []string, fixed bool) string {
 	var output string
 	if n {
-		output = Flagn(lineNumber) + lines[lineNumber] + "\n"
+		output = AddLineNumber(lineNumber) + highlight(lines[lineNumber], grepString, fixed) + "\n"
 	} else {
-		output = lines[lineNumber] + "\n"
+		output = highlight(lines[lineNumber], grepString, fixed) + "\n"
 	}
 
 	for i := 1; i <= aVal; i++ {
@@ -142,15 +153,15 @@ func FlagA(aVal int, lineNumber int, lines []string) string {
 		}
 
 		if n {
-			output += Flagn(lineNumber+i) + lines[lineNumber+i] + "\n"
+			output += AddLineNumber(lineNumber+i) + highlight(lines[lineNumber+i], grepString, fixed) + "\n"
 			continue
 		}
-		output += lines[lineNumber+i] + "\n"
+		output += highlight(lines[lineNumber+i], grepString, fixed) + "\n"
 	}
 	return output
 }
 
-func FlagB(bVal int, lineNumber int, lines []string) string {
+func FlagB(bVal int, lineNumber int, grepString string, lines []string, fixed bool) string {
 	output := ""
 	for i := bVal; i >= 0; i-- {
 		if lineNumber-i < 0 {
@@ -159,15 +170,15 @@ func FlagB(bVal int, lineNumber int, lines []string) string {
 		}
 
 		if n {
-			output += Flagn(lineNumber-i) + lines[lineNumber-i] + "\n"
+			output += AddLineNumber(lineNumber-i) + highlight(lines[lineNumber-i], grepString, fixed) + "\n"
 			continue
 		}
-		output += lines[lineNumber-i] + "\n"
+		output += highlight(lines[lineNumber-i], grepString, fixed) + "\n"
 	}
 	return output
 }
 
-func FlagC(cVal int, lineNumber int, lines []string) string {
+func FlagC(cVal int, lineNumber int, grepString string, lines []string, fixed bool) string {
 	output := ""
 	for i := cVal; i >= 0; i-- {
 		if lineNumber-i < 0 {
@@ -176,10 +187,10 @@ func FlagC(cVal int, lineNumber int, lines []string) string {
 		}
 
 		if n {
-			output += Flagn(lineNumber-i) + lines[lineNumber-i] + "\n"
+			output += AddLineNumber(lineNumber-i) + highlight(lines[lineNumber-i], grepString, fixed) + "\n"
 			continue
 		}
-		output += lines[lineNumber-i] + "\n"
+		output += highlight(lines[lineNumber-i], grepString, fixed) + "\n"
 		continue
 	}
 
@@ -190,14 +201,14 @@ func FlagC(cVal int, lineNumber int, lines []string) string {
 		}
 
 		if n {
-			output += Flagn(lineNumber+i) + lines[lineNumber+i] + "\n"
+			output += AddLineNumber(lineNumber+i) + highlight(lines[lineNumber+i], grepString, fixed) + "\n"
 			continue
 		}
-		output += lines[lineNumber+i] + "\n"
+		output += highlight(lines[lineNumber+i], grepString, fixed) + "\n"
 	}
 	return output
 }
 
-func Flagn(lineNumber int) string {
+func AddLineNumber(lineNumber int) string {
 	return fmt.Sprintf("%d:", lineNumber)
 }
