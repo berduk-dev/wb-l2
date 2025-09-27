@@ -9,27 +9,27 @@ import (
 )
 
 var (
-	A int
-	B int
-	C int
-	c bool
-	i bool
-	v bool
-	F bool
-	n bool
+	afterN       int
+	beforeN      int
+	contextN     int
+	onlyCount    bool
+	shouldIgnore bool
+	shouldInvert bool
+	shouldFixed  bool
+	shouldNumber bool
 )
 
 var count int
 
 func init() {
-	flag.IntVar(&A, "A", 0, "")
-	flag.IntVar(&B, "B", 0, "")
-	flag.IntVar(&C, "C", 0, "")
-	flag.BoolVar(&c, "c", false, "")
-	flag.BoolVar(&i, "i", false, "")
-	flag.BoolVar(&v, "v", false, "")
-	flag.BoolVar(&F, "F", false, "")
-	flag.BoolVar(&n, "n", false, "")
+	flag.IntVar(&afterN, "A", 0, "печатать +N строк после совпадения")
+	flag.IntVar(&beforeN, "B", 0, "печатать +N строк до совпадения")
+	flag.IntVar(&contextN, "C", 0, "печатать ±N строк вокруг совпадения")
+	flag.BoolVar(&onlyCount, "c", false, "количество строк")
+	flag.BoolVar(&shouldIgnore, "i", false, "игнорировать регистр")
+	flag.BoolVar(&shouldInvert, "v", false, "вместо совпадения, исключать")
+	flag.BoolVar(&shouldFixed, "F", false, "точное совпадение со строкой, не паттерн")
+	flag.BoolVar(&shouldNumber, "n", false, "напечатать номер строки")
 
 	flag.Parse()
 }
@@ -38,18 +38,18 @@ func main() {
 	grepString := flag.Arg(0)
 	filePath := flag.Arg(1)
 
-	if A < 0 {
-		fmt.Println("-A can't be < 0")
+	if afterN < 0 {
+		fmt.Println("-afterN can't be < 0")
 		os.Exit(0)
 	}
 
-	if B < 0 {
-		fmt.Println("-B can't be < 0")
+	if beforeN < 0 {
+		fmt.Println("-beforeN can't be < 0")
 		os.Exit(0)
 	}
 
-	if C < 0 {
-		fmt.Println("-C can't be < 0")
+	if contextN < 0 {
+		fmt.Println("-contextN can't be < 0")
 		os.Exit(0)
 	}
 
@@ -63,8 +63,8 @@ func main() {
 
 	lines := strings.Split(inString, "\n")
 
-	// реализация флага -i
-	if i {
+	// реализация флага -shouldIgnore
+	if shouldIgnore {
 		inString = strings.ToLower(inString)
 		grepString = strings.ToLower(grepString)
 	}
@@ -74,55 +74,56 @@ func main() {
 	var outputString string
 	var isEscape bool
 	for i := range linesLowerCase {
-		if F {
+		if shouldFixed {
 			isEscape = strings.Contains(linesLowerCase[i], grepString)
 		} else {
 			isEscape, _ = regexp.MatchString(grepString, linesLowerCase[i])
 		}
 
-		// реализация флага -c
-		if v {
-			if !isEscape {
-				if n {
-					outputString += AddLineNumber(i) + highlight(lines[i], grepString, F) + "\n"
-					count++
-					continue
-				}
-				outputString += highlight(lines[i], grepString, F) + "\n"
+		// реализация флага -onlyCount
+		if shouldInvert {
+			if isEscape {
+				continue
+			}
+
+			if shouldNumber {
+				outputString += AddLineNumber(i) + highlight(lines[i], grepString, shouldFixed) + "\n"
 				count++
 				continue
 			}
+			outputString += highlight(lines[i], grepString, shouldFixed) + "\n"
+			count++
 			continue
 		}
 		if isEscape {
-			if c {
+			if onlyCount {
 				count++
 				continue
 			}
 
-			if A > 0 {
-				outputString += FlagA(A, i, grepString, lines, F)
+			if afterN > 0 {
+				outputString += FlagA(afterN, i, grepString, lines, shouldFixed)
 				continue
 			}
-			if B > 0 {
-				outputString += FlagB(B, i, grepString, lines, F)
+			if beforeN > 0 {
+				outputString += FlagB(beforeN, i, grepString, lines, shouldFixed)
 				continue
 			}
-			if C > 0 {
-				outputString += FlagC(C, i, grepString, lines, F)
+			if contextN > 0 {
+				outputString += FlagC(contextN, i, grepString, lines, shouldFixed)
 				continue
 			}
 
-			if n {
-				outputString += AddLineNumber(i) + highlight(lines[i], grepString, F) + "\n"
+			if shouldNumber {
+				outputString += AddLineNumber(i) + highlight(lines[i], grepString, shouldFixed) + "\n"
 			} else {
-				outputString += highlight(lines[i], grepString, F) + "\n"
+				outputString += highlight(lines[i], grepString, shouldFixed) + "\n"
 			}
 		}
 	}
 
-	// реализация флага -c
-	if c {
+	// реализация флага -onlyCount
+	if onlyCount {
 		fmt.Println(count)
 		os.Exit(0)
 	}
@@ -136,7 +137,7 @@ func highlight(line, grepString string, fixed bool) string {
 		// ищем буквально, без regexp-метасимволов
 		re = regexp.MustCompile("(?i)" + regexp.QuoteMeta(grepString))
 	} else {
-		// как есть (регулярка)
+		// как есть
 		re = regexp.MustCompile("(?i)" + grepString)
 	}
 	return re.ReplaceAllString(line, "\033[31m$0\033[0m")
@@ -144,7 +145,7 @@ func highlight(line, grepString string, fixed bool) string {
 
 func FlagA(aVal int, lineNumber int, grepString string, lines []string, fixed bool) string {
 	var output string
-	if n {
+	if shouldNumber {
 		output = AddLineNumber(lineNumber) + highlight(lines[lineNumber], grepString, fixed) + "\n"
 	} else {
 		output = highlight(lines[lineNumber], grepString, fixed) + "\n"
@@ -156,7 +157,7 @@ func FlagA(aVal int, lineNumber int, grepString string, lines []string, fixed bo
 			continue
 		}
 
-		if n {
+		if shouldNumber {
 			output += AddLineNumber(lineNumber+i) + highlight(lines[lineNumber+i], grepString, fixed) + "\n"
 			continue
 		}
@@ -173,7 +174,7 @@ func FlagB(bVal int, lineNumber int, grepString string, lines []string, fixed bo
 			continue
 		}
 
-		if n {
+		if shouldNumber {
 			output += AddLineNumber(lineNumber-i) + highlight(lines[lineNumber-i], grepString, fixed) + "\n"
 			continue
 		}
@@ -191,7 +192,7 @@ func FlagC(cVal int, lineNumber int, grepString string, lines []string, fixed bo
 			continue
 		}
 
-		if n {
+		if shouldNumber {
 			output += AddLineNumber(lineNumber-i) + highlight(lines[lineNumber-i], grepString, fixed) + "\n"
 			continue
 		}
@@ -199,14 +200,14 @@ func FlagC(cVal int, lineNumber int, grepString string, lines []string, fixed bo
 		continue
 	}
 
-	// after line
+	// afterN line
 	for i := 1; i <= cVal; i++ {
 		if lineNumber+i >= len(lines) {
 			output += "\n"
 			continue
 		}
 
-		if n {
+		if shouldNumber {
 			output += AddLineNumber(lineNumber+i) + highlight(lines[lineNumber+i], grepString, fixed) + "\n"
 			continue
 		}
