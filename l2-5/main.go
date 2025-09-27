@@ -63,7 +63,7 @@ func main() {
 
 	lines := strings.Split(inString, "\n")
 
-	// Реализация флага -i
+	// реализация флага -i
 	if i {
 		inString = strings.ToLower(inString)
 		grepString = strings.ToLower(grepString)
@@ -72,14 +72,15 @@ func main() {
 	linesLowerCase := strings.Split(inString, "\n")
 
 	var outputString string
+	var isEscape bool
 	for i := range linesLowerCase {
-		var isEscape bool
 		if F {
 			isEscape = strings.Contains(linesLowerCase[i], grepString)
 		} else {
 			isEscape, _ = regexp.MatchString(grepString, linesLowerCase[i])
 		}
 
+		// реализация флага -c
 		if v {
 			if !isEscape {
 				if n {
@@ -94,7 +95,10 @@ func main() {
 			continue
 		}
 		if isEscape {
-			count++
+			if c {
+				count++
+				continue
+			}
 
 			if A > 0 {
 				outputString += FlagA(A, i, grepString, lines, F)
@@ -117,7 +121,7 @@ func main() {
 		}
 	}
 
-	// FlagA Реализация флага -c
+	// реализация флага -c
 	if c {
 		fmt.Println(count)
 		os.Exit(0)
@@ -179,6 +183,7 @@ func FlagB(bVal int, lineNumber int, grepString string, lines []string, fixed bo
 }
 
 func FlagC(cVal int, lineNumber int, grepString string, lines []string, fixed bool) string {
+	// before line and line
 	output := ""
 	for i := cVal; i >= 0; i-- {
 		if lineNumber-i < 0 {
@@ -194,6 +199,7 @@ func FlagC(cVal int, lineNumber int, grepString string, lines []string, fixed bo
 		continue
 	}
 
+	// after line
 	for i := 1; i <= cVal; i++ {
 		if lineNumber+i >= len(lines) {
 			output += "\n"
@@ -210,5 +216,5 @@ func FlagC(cVal int, lineNumber int, grepString string, lines []string, fixed bo
 }
 
 func AddLineNumber(lineNumber int) string {
-	return fmt.Sprintf("%d:", lineNumber)
+	return fmt.Sprintf("%d:", lineNumber+1)
 }
