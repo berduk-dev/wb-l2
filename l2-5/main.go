@@ -109,6 +109,11 @@ func main() {
 			if afterN > 0 || beforeN > 0 {
 				if beforeN > 0 {
 					outputString += FlagB(beforeN, i, grepString, lines, shouldFixed)
+					if shouldNumber {
+						outputString += AddLineNumber(i) + highlight(lines[i], grepString, shouldFixed) + "\n"
+					} else {
+						outputString += highlight(lines[i], grepString, shouldFixed) + "\n"
+					}
 				}
 				if afterN > 0 {
 					outputString += FlagA(afterN, i, grepString, lines, shouldFixed)
@@ -147,11 +152,6 @@ func highlight(line, grepString string, fixed bool) string {
 
 func FlagA(aVal int, lineNumber int, grepString string, lines []string, fixed bool) string {
 	var output string
-	if shouldNumber {
-		output = AddLineNumber(lineNumber) + highlight(lines[lineNumber], grepString, fixed) + "\n"
-	} else {
-		output = highlight(lines[lineNumber], grepString, fixed) + "\n"
-	}
 
 	for i := 1; i <= aVal; i++ {
 		if lineNumber+i >= len(lines) {
@@ -170,7 +170,7 @@ func FlagA(aVal int, lineNumber int, grepString string, lines []string, fixed bo
 
 func FlagB(bVal int, lineNumber int, grepString string, lines []string, fixed bool) string {
 	output := ""
-	for i := bVal; i >= 0; i-- {
+	for i := bVal; i >= 1; i-- {
 		if lineNumber-i < 0 {
 			output += "\n"
 			continue
