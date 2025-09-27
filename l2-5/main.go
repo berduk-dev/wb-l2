@@ -101,16 +101,18 @@ func main() {
 				continue
 			}
 
-			if afterN > 0 {
-				outputString += FlagA(afterN, i, grepString, lines, shouldFixed)
-				continue
-			}
-			if beforeN > 0 {
-				outputString += FlagB(beforeN, i, grepString, lines, shouldFixed)
-				continue
-			}
 			if contextN > 0 {
 				outputString += FlagC(contextN, i, grepString, lines, shouldFixed)
+				continue
+			}
+
+			if afterN > 0 || beforeN > 0 {
+				if beforeN > 0 {
+					outputString += FlagB(beforeN, i, grepString, lines, shouldFixed)
+				}
+				if afterN > 0 {
+					outputString += FlagA(afterN, i, grepString, lines, shouldFixed)
+				}
 				continue
 			}
 
