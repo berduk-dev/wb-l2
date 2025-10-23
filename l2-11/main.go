@@ -25,6 +25,9 @@ func main() {
 	calendarHandler := handler.New(calendarService, calendarUtils)
 
 	http.HandleFunc("/create_event", calendarHandler.CreateEvent)
+	http.HandleFunc("/update_event", calendarHandler.UpdateEvent)
+	http.HandleFunc("/delete_event", calendarHandler.DeleteEvent)
+	http.HandleFunc("/events_for_day", calendarHandler.EventsForDay)
 
 	fmt.Println("Сервер запущен")
 	err = http.ListenAndServe(":8080", nil)
