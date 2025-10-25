@@ -27,7 +27,9 @@ func main() {
 	http.HandleFunc("/create_event", calendarHandler.CreateEvent)
 	http.HandleFunc("/update_event", calendarHandler.UpdateEvent)
 	http.HandleFunc("/delete_event", calendarHandler.DeleteEvent)
-	http.HandleFunc("/events_for_day", calendarHandler.EventsForDay)
+	http.HandleFunc("/events_for_day", calendarHandler.EventsForToday)
+	http.HandleFunc("/events_for_week", calendarHandler.EventsForWeek)
+	http.HandleFunc("/events_for_month", calendarHandler.EventsForMonth)
 
 	fmt.Println("Сервер запущен")
 	err = http.ListenAndServe(":8080", nil)

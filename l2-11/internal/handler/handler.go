@@ -132,7 +132,7 @@ func (h *Handler) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	h.utils.WriteJSON(w, http.StatusOK, map[string]any{"result": "event deleted", "id": req.ID})
 }
 
-func (h *Handler) EventsForDay(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) EventsForToday(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		h.utils.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -145,7 +145,7 @@ func (h *Handler) EventsForDay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	events, err := h.service.EventsForToday(r.Context(), userID)
+	events, err := h.service.GetEventsForPeriod(r.Context(), userID, 0)
 	if err != nil {
 		log.Println(err)
 		h.utils.WriteErr(w, http.StatusInternalServerError, "internal server error")
@@ -153,4 +153,54 @@ func (h *Handler) EventsForDay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.utils.WriteJSON(w, http.StatusOK, map[string]any{"daily_events": events})
+}
+
+func (h *Handler) EventsForWeek(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		h.utils.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var week = 7
+
+	userID, err := strconv.Atoi(r.URL.Query().Get("user"))
+	if err != nil {
+		log.Println(err)
+		h.utils.WriteErr(w, http.StatusBadRequest, "error user id")
+		return
+	}
+
+	events, err := h.service.GetEventsForPeriod(r.Context(), userID, week)
+	if err != nil {
+		log.Println(err)
+		h.utils.WriteErr(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	h.utils.WriteJSON(w, http.StatusOK, map[string]any{"weekly_events": events})
+}
+
+func (h *Handler) EventsForMonth(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		h.utils.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var month = 30
+
+	userID, err := strconv.Atoi(r.URL.Query().Get("user"))
+	if err != nil {
+		log.Println(err)
+		h.utils.WriteErr(w, http.StatusBadRequest, "error user id")
+		return
+	}
+
+	events, err := h.service.GetEventsForPeriod(r.Context(), userID, month)
+	if err != nil {
+		log.Println(err)
+		h.utils.WriteErr(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	h.utils.WriteJSON(w, http.StatusOK, map[string]any{"monthly_events": events})
 }

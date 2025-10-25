@@ -39,14 +39,16 @@ func (s *Service) DeleteEvent(ctx context.Context, eventID int) error {
 	return err
 }
 
-func (s *Service) EventsForToday(ctx context.Context, userID int) ([]model.Event, error) {
-	events, err := s.repo.EventsForDay(ctx, userID)
+func (s *Service) GetEventsForPeriod(ctx context.Context, userID int, days int) ([]model.Event, error) {
+	events, err := s.repo.GetEventsByUserID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	now := time.Now()
+
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	endDate := today.AddDate(0, 0, days)
 
 	var dailyEvents []model.Event
 	for _, e := range events {
@@ -56,11 +58,19 @@ func (s *Service) EventsForToday(ctx context.Context, userID int) ([]model.Event
 			continue
 		}
 
-		eventDate = eventDate.Truncate(24 * time.Hour)
+		eventDate = time.Date(eventDate.Year(), eventDate.Month(), eventDate.Day(), 0, 0, 0, 0, eventDate.Location())
 
-		if eventDate.Year() == today.Year() &&
+		sameDay := eventDate.Year() == today.Year() && // если событие на сегодня
 			eventDate.Month() == today.Month() &&
-			eventDate.Day() == today.Day() {
+			eventDate.Day() == today.Day()
+
+		if days == 0 { // если события только на сегодня
+			if sameDay {
+				dailyEvents = append(dailyEvents, e)
+			}
+			continue
+		}
+		if !eventDate.Before(today) && !eventDate.After(endDate) {
 			dailyEvents = append(dailyEvents, e)
 		}
 	}

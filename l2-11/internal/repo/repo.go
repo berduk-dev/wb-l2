@@ -64,7 +64,7 @@ func (r *Repository) DeleteEvent(ctx context.Context, eventID int) error {
 	return nil
 }
 
-func (r *Repository) EventsForDay(ctx context.Context, userID int) ([]model.Event, error) {
+func (r *Repository) GetEventsByUserID(ctx context.Context, userID int) ([]model.Event, error) {
 	rows, err := r.db.Query(ctx, `
 			SELECT * FROM events
 			WHERE user_id = $1`,
